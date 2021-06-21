@@ -20,10 +20,10 @@ namespace ShoesStore.API.Controllers
         }
 
         [HttpGet]
-        public IQueryable<ProductsDto> GetProductsByCategory(int categoryID)
+        public IQueryable<ProductsDto> GetProductsByCategory(int branchID)
         {
             var query = from a in this._shoesStoreContext.Products
-                        where a.CategoryId == categoryID
+                        where a.BranchId == branchID
                         select new ProductsDto()
                         {
                             Id = a.Id,
@@ -48,17 +48,28 @@ namespace ShoesStore.API.Controllers
         }
 
         [HttpGet("Features")]
-        public IQueryable<ProductsDto> GetFeatureProducts()
+        public IEnumerable<ProductsDto> GetFeatureProducts(int n = 4)
         {
-            var query = from a in this._shoesStoreContext.Products
-                        select new ProductsDto()
-                        {
-                            Id = a.Id,
-                            Name = a.Name,
-                            Price = a.Price
-                        };
+            var query = this._shoesStoreContext.Products.ToList();
 
-            return query.Take(4);
+            var listFeature = new List<Product>();
+            Random rand = new Random();
+
+            for (int i = 0; i < n; i++)
+            {
+                int randomNumber = rand.Next(1, this._shoesStoreContext.Products.Count());
+                listFeature.Add(query.ElementAt(randomNumber));
+            }
+
+            var selectQuery = from a in listFeature
+                              select new ProductsDto()
+                              {
+                                  Id = a.Id,
+                                  Name = a.Name,
+                                  Price = a.Price
+                              };
+                
+            return selectQuery;
         }
     }
 }
